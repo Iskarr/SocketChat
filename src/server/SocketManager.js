@@ -12,7 +12,7 @@ const {
 const io = require("./index.js").io;
 const { createUser, createMessage, createChat } = require("../Factories");
 let connectedUsers = {};
-let communityChat = createChat();
+let communityChat = createChat({ isCommunity: true });
 let SendTypingFromUser;
 
 module.exports = function(socket) {
