@@ -53,6 +53,7 @@ textarea {
   align-items: flex-start;
   height: 100%;
   width: 100%;
+  font-size: 1em;
 }
 #side-bar {
   box-sizing: border-box;
@@ -223,6 +224,7 @@ textarea {
 }
 .chat-header .user-info .user-name {
   margin-right: 10px;
+  font-size: 1.2em;
 }
 .chat-header .user-info .status {
   align-items: center;
@@ -305,16 +307,17 @@ textarea {
   margin-left: 25px;
 }
 .message-container .name {
-  font-size: 0.75em;
+  font-size: 0.9em;
   margin-top: 3px;
   text-align: right;
+  color: darkslateblue;
 }
 .message-container .message {
   background: #fff;
   border-radius: 5px;
   border-top-left-radius: 0;
   box-sizing: border-box;
-  color: #b3b2ca;
+  color: #5d5d8a;
   height: 100%;
   padding: 10px 15px;
   position: relative;

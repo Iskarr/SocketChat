@@ -49,7 +49,7 @@ export default class SideBar extends Component {
       <div id="side-bar">
         <div className="heading">
           <div className="app-name">
-            Our Cool Chat <FaChevronDown />
+            College Conclave <FaChevronDown />
           </div>
           <div className="menu">
             <MdMenu />
