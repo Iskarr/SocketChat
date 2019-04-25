@@ -117,7 +117,7 @@ export default class ChatContainer extends Component {
 
   /*
    * 	Returns a function that will
-   *	adds message to chat with the chatId passed in.
+   *	add message to chat with the chatId passed in.
    *
    * 	@param chatId {number}
    */

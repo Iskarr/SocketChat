@@ -1,3 +1,4 @@
+const io = require("./index.js").io;
 const {
   VERIFY_USER,
   USER_CONNECTED,
@@ -10,16 +11,82 @@ const {
   PRIVATE_MESSAGE,
   NEW_CHAT_USER
 } = require("../Events");
-const io = require("./index.js").io;
 const { createUser, createMessage, createChat } = require("../Factories");
+const colors = require("colors");
+
 let connectedUsers = {};
 let communityChat = createChat({ isCommunity: true });
 let SendTypingFromUser;
 
+//MongoDB section
+
+//Mongo is required to connect to the DB
+var mongoose = require("mongoose");
+//Mongo connects to a test database using the 27017 localhost address
+mongoose.connect("mongodb://localhost:27017/test", { useNewUrlParser: true });
+//this is the actual connection var we use
+var db = mongoose.connection;
+
+// this just spits out the connection and tells us if it is connected
+db.on("error", console.error.bind(console, "connection Error".red));
+db.once("open", function(callback) {
+  console.log("Connection Success!!".green);
+});
+
+// Schema
+var Schema = mongoose.Schema;
+var bugSchema = new Schema({
+  bugname: String,
+  bugColour: String,
+  Genus: String
+});
+
+var Bug = mongoose.model("Bug", bugSchema);
+module.exports = Bug;
+// The object to be  saved
+var bee = new Bug({
+  bugname: "Scruffy",
+  bugColour: "Orange",
+  Genus: "Bombus"
+});
+
+// Saves the bee
+function SaveLaBee() {
+  bee.save(function(error) {
+    console.log("Your WORD had been saved!!".green);
+    if (error) {
+      console.error(error);
+    }
+  });
+}
+
+// Socket Exports
 module.exports = function(socket) {
   console.log("Socket Id: " + socket.id);
 
   let sendMessageToChatFromUser;
+
+  //This sends and logs chatId, message and socketId
+  socket.on(MESSAGE_SENT, ({ chatId, message }) => {
+    const UserId = socket.id;
+    var MessageBug = new Bug({
+      bugname: message,
+      bugColour: chatId,
+      Genus: UserId
+    });
+    function SaveLaBee() {
+      MessageBug.save(function(error) {
+        console.log("Your WORD had been saved!!".green);
+        if (error) {
+          console.error(error);
+        }
+      });
+    }
+    var DataMessage = message;
+    sendMessageToChatFromUser(chatId, message);
+    console.log("Saving Message: ".green + SaveLaBee());
+    //Add SaveLaBee() to console.log to save messages.
+  });
 
   //Verify User
   socket.on(VERIFY_USER, (nickname, callback) => {
@@ -45,6 +112,7 @@ module.exports = function(socket) {
     io.emit(USER_CONNECTED, connectedUsers);
     console.log(connectedUsers);
   });
+
   //User disconnects
   socket.on("disconnect", () => {
     if ("user" in socket) {
@@ -61,18 +129,16 @@ module.exports = function(socket) {
     console.log("Disconnect ", connectedUsers);
   });
 
-  //Get Community chat
+  // Get Community chat
   socket.on(COMMUNITY_CHAT, callback => {
     callback(communityChat);
-  });
-
-  socket.on(MESSAGE_SENT, ({ chatId, message }) => {
-    sendMessageToChatFromUser(chatId, message);
   });
 
   socket.on(TYPING, ({ chatId, isTyping }) => {
     SendTypingFromUser(chatId, isTyping);
   });
+
+  // Private Messages
   socket.on(PRIVATE_MESSAGE, ({ reciever, sender, activeChat }) => {
     if (reciever in connectedUsers) {
       const recieverSocket = connectedUsers[reciever].socketId;
@@ -89,12 +155,10 @@ module.exports = function(socket) {
             .filter(user => user in connectedUsers)
             .map(user => connectedUsers[user])
             .map(user => {
-              socket
-                .to(user.socketId)
-                .emit(NEW_CHAT_USER, {
-                  chatId: activeChat.id,
-                  newUser: reciever
-                });
+              socket.to(user.socketId).emit(NEW_CHAT_USER, {
+                chatId: activeChat.id,
+                newUser: reciever
+              });
             });
           socket.emit(NEW_CHAT_USER, {
             chatId: activeChat.id,
